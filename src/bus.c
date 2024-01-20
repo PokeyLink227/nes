@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "bus.h"
 #include "cpu.h"
+#include "ppu.h"
 
 byte bus_read(word addr) {
 

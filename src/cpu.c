@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "bus.h"
 #include "cpu.h"
 
 Instr opcode_lookup[0x100] = {
