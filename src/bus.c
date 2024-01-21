@@ -4,18 +4,19 @@
 #include "ppu.h"
 
 byte bus_read(word addr) {
-
-    if (addr < 0x2000) return 0x00;
-    else if (addr < 0x4000) {
-        /*ppu stuff at addr & 0x1 */
-    }
-
-    return 0x00;
+    if      (addr < 0x2000)  return 0x0;
+    else if (addr < 0x4000)  return ppu_registers[addr & 0x01];
+    else                     return 0x0;
 }
 
+/*
+    returns 0x0 on successful write and 0x1 on failure
+*/
 byte bus_write(word addr, byte data) {
-
-    return 0x00;
+    if      (addr < 0x2000)  return 0x1;
+    else if (addr < 0x4000)  ppu_registers[addr & 0x01] = data;
+    else                     return 0x1;
+    return 0x0;
 }
 
 byte load_rom(const char *file_name, word addr) {
@@ -57,9 +58,9 @@ byte load_rom(const char *file_name, word addr) {
 int main(int argc, char **argv) {
 
 
-    reset_cpu();
+    run_cpu();
 
-    printf("hello\n");
+    printf("CPU RETURNED\n");
 
 
     return 0;

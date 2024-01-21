@@ -1,6 +1,8 @@
 #ifndef __NES_CPU__
 #define __NES_CPU__
 
+#include "bus.h"
+
 enum cpu_status_flags {
     CARRY       = 0x01,
     ZERO        = 0x02,
@@ -110,5 +112,6 @@ byte set_address_mode(byte);
 byte execute_instr(byte);
 
 void reset_cpu();
+int run_cpu();
 
 #endif /* __NES_CPU__ */

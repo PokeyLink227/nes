@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "bus.h"
 #include "cpu.h"
 
 Instr opcode_lookup[0x100] = {
@@ -39,7 +38,7 @@ const char mnemonics[57][4] = {
 
 word pc;
 byte acc, x, y, stkptr, status;
-byte ram[0x2000];
+byte ram[0x800];
 
 Instr cur_instr;
 word data_addr;
@@ -59,27 +58,14 @@ byte get_flag(byte flag) {
 }
 
 byte read(word addr) {
-
-    return ram[addr];
-
-
-
-    if (addr < 0x2000) {
-        /*read ram*/
-        return ram[addr & 0x07FF];
-    } else if (addr < 0x4000) {
-        /* read PPU registers   (addr - 0x2000) % 0x0008 + 0x2000*/
-    }
-    return bus_read(addr);
+    if (addr < 0x2000) return ram[addr & 0x07FF];
+    else return bus_read(addr);
 }
 
 byte write(word addr, byte data) {
     if (addr < 0x2000) {
-        /*write to ram*/
         ram[addr & 0x07FF] = data;
-        return 0x01;
-    } else if (addr < 0x4000) {
-        /* write to PPU registers   (addr - 0x2000) % 0x0008 + 0x2000*/
+        return 0x00;
     }
     return bus_write(addr, data);
 }
@@ -658,6 +644,8 @@ void reset_cpu() {
     status = UNUSED;
 }
 
+
+
 byte load_prog(const char *file_name, word addr) {
     int read_size, f_size;
     FILE *fp = fopen(file_name, "rb");
@@ -669,6 +657,50 @@ byte load_prog(const char *file_name, word addr) {
 
     fread(ram + addr, 1, f_size, fp);
     fclose(fp);
+
+    return 1;
+}
+
+int clock_cpu() {
+    byte extra_cycle;
+
+    cur_instr = opcode_lookup[read(pc++)];
+    cycles = cur_instr.cycles;
+    printf("%s", mnemonics[cur_instr.opcode]);
+    extra_cycle = set_address_mode(cur_instr.addr_mode);
+    extra_cycle &= execute_instr(cur_instr.opcode);
+    if (extra_cycle) cycles++;
+}
+
+int run_cpu() {
+    byte extra_cycle, c;
+    printf("loading\n");
+
+    if (load_prog("prog.nes", 0x0200)) printf("loaded rom\n");
+    else {
+        printf("failed to load rom\n");
+        return 0;
+    }
+
+
+
+    pc = 0x0200;
+
+    reset_cpu();
+    //printf("\033[2J\033[H");
+    //disp_cpu();
+
+
+    while (1) {
+
+        c = getc(stdin);
+        if (c == 'q') break;
+        clock_cpu();
+
+    }
+
+    //printf("\033[2J\033[H");
+
 
     return 0;
 }
