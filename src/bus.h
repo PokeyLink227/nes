@@ -5,6 +5,8 @@ typedef unsigned char   byte;
 typedef unsigned short  word;
 typedef unsigned int    dword;
 
+byte ppu_registers[8];
+
 byte bus_read(word);
 byte bus_write(word, byte);
 

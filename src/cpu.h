@@ -13,20 +13,20 @@ enum cpu_status_flags {
 };
 
 enum addr_mode {
-    ADR_XXX,
-    ADR_ACC,
-    ADR_IMM,
-    ADR_ZPG,
-    ADR_ZPX,
-    ADR_ZPY,
-    ADR_ABS,
-    ADR_ABX,
-    ADR_ABY,
-    ADR_IMP,
-    ADR_REL,
-    ADR_INX,
-    ADR_INY,
-    ADR_IND
+    ADDR_XXX,
+    ADDR_ACC,
+    ADDR_IMM,
+    ADDR_ZPG,
+    ADDR_ZPX,
+    ADDR_ZPY,
+    ADDR_ABS,
+    ADDR_ABX,
+    ADDR_ABY,
+    ADDR_IMP,
+    ADDR_REL,
+    ADDR_INX,
+    ADDR_INY,
+    ADDR_IND
 };
 
 enum opcode {

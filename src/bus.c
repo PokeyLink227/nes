@@ -5,6 +5,11 @@
 
 byte bus_read(word addr) {
 
+    if (addr < 0x2000) return 0x00;
+    else if (addr < 0x4000) {
+        /*ppu stuff at addr & 0x1 */
+    }
+
     return 0x00;
 }
 
