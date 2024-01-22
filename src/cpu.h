@@ -95,13 +95,6 @@ typedef struct instruction {
     byte opcode, addr_mode, cycles;
 } Instr;
 
-struct INES_HEADER {
-    byte ID[4];
-    byte PRG_ROM_SZ, CHR_ROM_SZ;
-    byte FLAGS[5];
-    byte PADDING[5];
-};
-
 void set_flag(byte, word);
 byte get_flag(byte);
 
