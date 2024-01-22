@@ -2,11 +2,17 @@
 #include "bus.h"
 #include "cpu.h"
 #include "ppu.h"
+#include "mappers.h"
+
+byte (* mapper_read)(word);
+byte (* mapper_write)(word, byte);
 
 byte bus_read(word addr) {
     if      (addr < 0x2000)  return 0x0;
     else if (addr < 0x4000)  return ppu_registers[addr & 0x01];
-    else                     return 0x0;
+    else if (addr < 0x4018)  return 0x0;
+    else if (addr < 0x4020)  return 0x0;
+    else                     return mapper_read(addr);
 }
 
 /*
@@ -15,11 +21,13 @@ byte bus_read(word addr) {
 byte bus_write(word addr, byte data) {
     if      (addr < 0x2000)  return 0x1;
     else if (addr < 0x4000)  ppu_registers[addr & 0x01] = data;
-    else                     return 0x1;
+    else if (addr < 0x4018)  return 0x1;
+    else if (addr < 0x4020)  return 0x1;
+    else                     return mapper_write(addr, data);
     return 0x0;
 }
 
-byte load_rom(const char *file_name, word addr) {
+byte load_rom(const char *file_name) {
     int read_size, f_size;
     struct INES_HEADER header;
     FILE *fp = fopen(file_name, "rb");
@@ -36,10 +44,13 @@ byte load_rom(const char *file_name, word addr) {
     // read CHR rom
     // read INST-rom
     // read PROM
-    byte mapper = header.FLAGS[1] & 0x0F;
-    mapper |= (header.FLAGS[0] & 0xF0) >> 4;
-    printf("mapper id: %d\n", mapper);
+    byte mapper_id = header.FLAGS[1] & 0x0F;
+    mapper_id |= (header.FLAGS[0] & 0xF0) >> 4;
+    printf("mapper id: %d\n", mapper_id);
     return 0;
+    switch (mapper_id) {
+        case 0: mapper_read = mapper_read__00; mapper_write = mapper_write_00; break;
+    }
 
 
     /*
