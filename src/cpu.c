@@ -63,10 +63,8 @@ byte cpu_read(word addr) {
 }
 
 byte cpu_write(word addr, byte data) {
-    printf("write requested\n");
     if (addr < 0x2000) {
         ram[addr & 0x07FF] = data;
-        printf("wrote to %02X\n", addr);
         return 0x00;
     }
     return bus_write(addr, data);
