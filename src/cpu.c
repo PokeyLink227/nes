@@ -644,8 +644,7 @@ void reset_cpu() {
     status = UNUSED;
 }
 
-
-
+/*
 byte load_prog(const char *file_name, word addr) {
     int read_size, f_size;
     FILE *fp = fopen(file_name, "rb");
@@ -660,6 +659,7 @@ byte load_prog(const char *file_name, word addr) {
 
     return 1;
 }
+*/
 
 int clock_cpu() {
     byte extra_cycle;
@@ -670,78 +670,6 @@ int clock_cpu() {
     extra_cycle = set_address_mode(cur_instr.addr_mode);
     extra_cycle &= execute_instr(cur_instr.opcode);
     if (extra_cycle) cycles++;
-}
-
-int run_cpu() {
-    byte extra_cycle, c;
-    printf("loading\n");
-
-    if (load_prog("prog.nes", 0x0200)) printf("loaded rom\n");
-    else {
-        printf("failed to load rom\n");
-        return 0;
-    }
-
-
-
-    pc = 0x0200;
-
-    reset_cpu();
-    //printf("\033[2J\033[H");
-    //disp_cpu();
-
-
-    while (1) {
-
-        c = getc(stdin);
-        if (c == 'q') break;
-        clock_cpu();
-
-    }
-
-    //printf("\033[2J\033[H");
-
 
     return 0;
 }
-
-/*
-int main(int argc, char **argv) {
-    byte extra_cycle, c;
-    printf("loading\n");
-
-    if (load_prog("prog.nes", 0x0200)) printf("loaded rom\n");
-    else {
-        printf("failed to load rom\n");
-        //return 0;
-    }
-
-
-
-    pc = 0x0200;
-
-    reset_cpu();
-    printf("\033[2J\033[H");
-    disp_cpu();
-
-
-    while (1) {
-
-        c = getc(stdin);
-        if (c == 'q') break;
-
-        disp_cpu();
-        cur_instr = opcode_lookup[read(pc++)];
-        cycles = cur_instr.cycles;
-        printf("%s", mnemonics[cur_instr.opcode]);
-        extra_cycle = set_address_mode(cur_instr.addr_mode);
-        extra_cycle &= execute_instr(cur_instr.opcode);
-        if (extra_cycle) cycles++;
-    }
-
-    printf("\033[2J\033[H");
-
-
-    return 0;
-}
-*/
