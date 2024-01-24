@@ -29,7 +29,10 @@ enum ppu_status_fields {
 };
 
 byte ppu_registers[0x8];
+byte ppu_pattern_table[2][0x1000];
+byte ppu_nametable[0x1000];
+byte ppu_palette[0x0020];
 
-byte ppu_clock();
+byte clock_ppu();
 
 #endif /* __NES_PPU__ */

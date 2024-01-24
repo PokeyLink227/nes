@@ -57,7 +57,7 @@ byte get_flag(byte flag) {
     return (status & flag) != 0;
 }
 
-byte read(word addr) {
+byte cpu_read(word addr) {
     if (addr < 0x2000) return ram[addr & 0x07FF];
     else return bus_read(addr);
 }
@@ -89,30 +89,30 @@ byte set_address_mode(byte mode) {
     }
 
     case ADDR_ZPG: {
-        data_addr = read(pc++);
+        data_addr = cpu_read(pc++);
         return 0;
     }
 
     case ADDR_ZPX: {
-        data_addr = (x + read(pc++)) & 0x00FF;
+        data_addr = (x + cpu_read(pc++)) & 0x00FF;
         return 0;
     }
 
     case ADDR_ZPY: {
-        data_addr = (y + read(pc++)) & 0x00FF;
+        data_addr = (y + cpu_read(pc++)) & 0x00FF;
         return 0;
     }
 
     case ADDR_ABS: {
-        low = read(pc++);
-        high = read(pc++);
+        low = cpu_read(pc++);
+        high = cpu_read(pc++);
         data_addr = (high << 8) | low;
         return 0;
     }
 
     case ADDR_ABX: {
-        low = read(pc++);
-        high = read(pc++);
+        low = cpu_read(pc++);
+        high = cpu_read(pc++);
         data_addr = (high << 8) | low;
         data_addr += x;
         /* checks if page boundry was crossed */
@@ -120,8 +120,8 @@ byte set_address_mode(byte mode) {
     }
 
     case ADDR_ABY: {
-        low = read(pc++);
-        high = read(pc++);
+        low = cpu_read(pc++);
+        high = cpu_read(pc++);
         data_addr = (high << 8) | low;
         data_addr += y;
         return ((data_addr & 0xFF00) != (high << 8));
@@ -132,33 +132,33 @@ byte set_address_mode(byte mode) {
     }
 
     case ADDR_REL: { /* additional cycles need to be calculated per instruction */
-        data_addr = read(pc++);
+        data_addr = cpu_read(pc++);
         if (data_addr & 0x80) data_addr |= 0xFF00;
         return 0;
     }
 
     case ADDR_INX: {
-        low = read(pc++);
+        low = cpu_read(pc++);
         low = (low + x) & 0x00FF;
         data_addr = low;
 
-        low = read(data_addr++);
-        high = read(data_addr);
+        low = cpu_read(data_addr++);
+        high = cpu_read(data_addr);
         data_addr = (high << 8) | low;
         return 0;
     }
 
     case ADDR_INY: {
-        low = read(pc++);
-        high = read(pc++);
+        low = cpu_read(pc++);
+        high = cpu_read(pc++);
         data_addr = (high << 8) | low;
         data_addr += y;
         return ((data_addr & 0xFF00) != (high << 8));
     }
 
     case ADDR_IND: {
-        low = read(pc++);
-        high = read(pc++);
+        low = cpu_read(pc++);
+        high = cpu_read(pc++);
         data_addr = (high << 8) | low;
 
         /*
@@ -166,12 +166,12 @@ byte set_address_mode(byte mode) {
             when reading across page boundries wrap rather than cross
         */
         if (low == 0x00FF) {
-            low = read(data_addr);
-            high = read(data_addr & 0xFF00);
+            low = cpu_read(data_addr);
+            high = cpu_read(data_addr & 0xFF00);
             data_addr = (high << 8) | low;
         } else {
-            low = read(data_addr++);
-            high = read(data_addr);
+            low = cpu_read(data_addr++);
+            high = cpu_read(data_addr);
             data_addr = (high << 8) | low;
         }
         return 0;
@@ -186,9 +186,9 @@ byte execute_instr(byte instr) {
     switch (instr) {
     case OP_ADC: {
         if (get_flag(DECIMALMODE)) printf("AHHHHHHHH I CANT DO THIS\n");
-        word sum = acc + read(data_addr) + get_flag(CARRY);
+        word sum = acc + cpu_read(data_addr) + get_flag(CARRY);
 
-        set_flag(OVERFLOW, (~(acc ^ read(data_addr)) & (acc ^ (byte)sum)) & 0x0080);
+        set_flag(OVERFLOW, (~(acc ^ cpu_read(data_addr)) & (acc ^ (byte)sum)) & 0x0080);
         set_flag(CARRY, sum > 0xFF);
         set_flag(ZERO, sum == 0x00);
         set_flag(NEGATIVE, sum & 0x80);
@@ -198,7 +198,7 @@ byte execute_instr(byte instr) {
     }
 
     case OP_AND: {
-        acc &= read(data_addr);
+        acc &= cpu_read(data_addr);
         set_flag(ZERO, acc == 0x00);
         set_flag(NEGATIVE, acc & 0x80);
         return 1;
@@ -211,7 +211,7 @@ byte execute_instr(byte instr) {
             set_flag(ZERO, acc == 0x00);
             set_flag(NEGATIVE, acc & 0x80);
         } else {
-            byte temp = read(data_addr);
+            byte temp = cpu_read(data_addr);
             set_flag(CARRY, temp & 0x80);
             temp <<= 1;
             set_flag(ZERO, temp == 0x00);
@@ -248,7 +248,7 @@ byte execute_instr(byte instr) {
     }
 
     case OP_BIT: {
-        byte temp = read(data_addr);
+        byte temp = cpu_read(data_addr);
         set_flag(ZERO, (temp & acc) == 0);
         set_flag(OVERFLOW, temp & 0x40);
         set_flag(NEGATIVE, temp & 0x80);
@@ -287,8 +287,8 @@ byte execute_instr(byte instr) {
         write(0x0100 + stkptr--, pc & 0x00FF);
         write(0x0100 + stkptr--, status);
 
-        pc = read(0xFFFE);
-        pc |= (read(0xFFFF) << 8) & 0xFF00;
+        pc = cpu_read(0xFFFE);
+        pc |= (cpu_read(0xFFFF) << 8) & 0xFF00;
 
         set_flag(BRKCOMMAND, 1);
         return 0;
@@ -333,31 +333,31 @@ byte execute_instr(byte instr) {
     }
 
     case OP_CMP: {
-        word temp = acc - read(data_addr);
-        set_flag(CARRY, acc >= read(data_addr));
+        word temp = acc - cpu_read(data_addr);
+        set_flag(CARRY, acc >= cpu_read(data_addr));
         set_flag(NEGATIVE, temp & 0x80);
         set_flag(ZERO, temp == 0);
         return 0;
     }
 
     case OP_CPX: {
-        word temp = x - read(data_addr);
-        set_flag(CARRY, x >= read(data_addr));
+        word temp = x - cpu_read(data_addr);
+        set_flag(CARRY, x >= cpu_read(data_addr));
         set_flag(NEGATIVE, temp & 0x80);
         set_flag(ZERO, temp == 0);
         return 0;
     }
 
     case OP_CPY: {
-        word temp = y - read(data_addr);
-        set_flag(CARRY, y >= read(data_addr));
+        word temp = y - cpu_read(data_addr);
+        set_flag(CARRY, y >= cpu_read(data_addr));
         set_flag(NEGATIVE, temp & 0x80);
         set_flag(ZERO, temp == 0);
         return 0;
     }
 
     case OP_DEC: {
-        byte temp = read(data_addr);
+        byte temp = cpu_read(data_addr);
         temp -= 1;
         write(data_addr, temp);
         set_flag(ZERO, temp == 0x00);
@@ -380,14 +380,14 @@ byte execute_instr(byte instr) {
     }
 
     case OP_EOR: {
-        acc ^= read(data_addr);
+        acc ^= cpu_read(data_addr);
         set_flag(ZERO, acc == 0x00);
         set_flag(NEGATIVE, acc & 0x80);
         return 1;
     }
 
     case OP_INC: {
-        byte temp = read(data_addr);
+        byte temp = cpu_read(data_addr);
         temp += 1;
         write(data_addr, temp);
         set_flag(ZERO, temp == 0x00);
@@ -423,21 +423,21 @@ byte execute_instr(byte instr) {
     }
 
     case OP_LDA: {
-        acc = read(data_addr);
+        acc = cpu_read(data_addr);
         set_flag(ZERO, acc == 0x00);
         set_flag(NEGATIVE, acc & 0x80);
         return 0;
     }
 
     case OP_LDX: {
-        x = read(data_addr);
+        x = cpu_read(data_addr);
         set_flag(ZERO, x == 0x00);
         set_flag(NEGATIVE, x & 0x80);
         return 0;
     }
 
     case OP_LDY: {
-        y = read(data_addr);
+        y = cpu_read(data_addr);
         set_flag(ZERO, y == 0x00);
         set_flag(NEGATIVE, y & 0x80);
         return 0;
@@ -450,7 +450,7 @@ byte execute_instr(byte instr) {
             set_flag(ZERO, acc == 0x00);
             set_flag(NEGATIVE, acc & 0x80);
         } else {
-            byte temp = read(data_addr);
+            byte temp = cpu_read(data_addr);
             set_flag(CARRY, temp & 0x01);
             temp >>= 1;
             set_flag(ZERO, temp == 0x00);
@@ -465,7 +465,7 @@ byte execute_instr(byte instr) {
     }
 
     case OP_ORA: {
-        acc |= read(data_addr);
+        acc |= cpu_read(data_addr);
         set_flag(ZERO, acc == 0x00);
         set_flag(NEGATIVE, acc & 0x80);
         return 0;
@@ -485,13 +485,13 @@ byte execute_instr(byte instr) {
 
     case OP_PLA: {
         stkptr++;
-        acc = read(0x0100 | stkptr);
+        acc = cpu_read(0x0100 | stkptr);
         return 0;
     }
 
     case OP_PLP: {
         stkptr++;
-        status = read(0x0100 | stkptr);
+        status = cpu_read(0x0100 | stkptr);
         return 0;
     }
 
@@ -504,9 +504,9 @@ byte execute_instr(byte instr) {
             acc = temp;
         }
         else {
-            temp = read(data_addr) << 1;
+            temp = cpu_read(data_addr) << 1;
             if (get_flag(CARRY)) temp |= 0x01;
-            set_flag(CARRY, read(data_addr) & 0x80);
+            set_flag(CARRY, cpu_read(data_addr) & 0x80);
             write(data_addr, temp);
         }
         set_flag(ZERO, temp == 0x00);
@@ -523,9 +523,9 @@ byte execute_instr(byte instr) {
             acc = temp;
         }
         else {
-            temp = read(data_addr) >> 1;
+            temp = cpu_read(data_addr) >> 1;
             if (get_flag(CARRY)) temp |= 0x80;
-            set_flag(CARRY, read(data_addr) & 0x01);
+            set_flag(CARRY, cpu_read(data_addr) & 0x01);
             write(data_addr, temp);
         }
         set_flag(ZERO, temp == 0x00);
@@ -534,15 +534,15 @@ byte execute_instr(byte instr) {
     }
 
     case OP_RTI: {
-        status = read(++stkptr);
-        pc = read(++stkptr);
-        pc |= (read(++stkptr) << 8) & 0xFF00;
+        status = cpu_read(++stkptr);
+        pc = cpu_read(++stkptr);
+        pc |= (cpu_read(++stkptr) << 8) & 0xFF00;
         return 0;
     }
 
     case OP_RTS: {
-        pc = read(++stkptr);
-        pc |= (read(++stkptr) << 8) & 0xFF00;
+        pc = cpu_read(++stkptr);
+        pc |= (cpu_read(++stkptr) << 8) & 0xFF00;
 
         pc++;
         return 0;
@@ -550,14 +550,14 @@ byte execute_instr(byte instr) {
 
     case OP_SBC: {
         /*
-        word temp = acc - read(data_addr) - (1 - get_flag(CARRY));
-        word temp = acc + (~read(data_addr) + 1) - 1 + get_flag(CARRY);
+        word temp = acc - cpu_read(data_addr) - (1 - get_flag(CARRY));
+        word temp = acc + (~cpu_read(data_addr) + 1) - 1 + get_flag(CARRY);
         */
-        word temp = acc + ~read(data_addr) + get_flag(CARRY);
+        word temp = acc + ~cpu_read(data_addr) + get_flag(CARRY);
 
         set_flag(CARRY, !(temp & 0xFF00));
         set_flag(ZERO, (temp & 0x00FF) == 0x00);
-        set_flag(OVERFLOW, ((acc ^ read(data_addr)) & (acc ^ temp)) & 0x0080);
+        set_flag(OVERFLOW, ((acc ^ cpu_read(data_addr)) & (acc ^ temp)) & 0x0080);
         set_flag(NEGATIVE, temp & 0x80);
         acc = temp & 0x00FF;
         return 0;
@@ -666,7 +666,7 @@ byte load_prog(const char *file_name, word addr) {
 byte clock_cpu() {
     byte extra_cycle;
 
-    cur_instr = opcode_lookup[read(pc++)];
+    cur_instr = opcode_lookup[cpu_read(pc++)];
     cycles = cur_instr.cycles;
     printf("%s\n", mnemonics[cur_instr.opcode]);
     extra_cycle = set_address_mode(cur_instr.addr_mode);

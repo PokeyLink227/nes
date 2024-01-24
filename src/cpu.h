@@ -95,14 +95,8 @@ typedef struct instruction {
     byte opcode, addr_mode, cycles;
 } Instr;
 
-void set_flag(byte, word);
-byte get_flag(byte);
-
-byte read(word);
-byte write(word, byte);
-
-byte set_address_mode(byte);
-byte execute_instr(byte);
+byte cpu_read(word);
+byte cpu_write(word, byte);
 
 void reset_cpu();
 byte clock_cpu();
