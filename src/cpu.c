@@ -663,7 +663,7 @@ byte load_prog(const char *file_name, word addr) {
 }
 */
 
-int clock_cpu() {
+byte clock_cpu() {
     byte extra_cycle;
 
     cur_instr = opcode_lookup[read(pc++)];
