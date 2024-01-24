@@ -33,6 +33,9 @@ byte ppu_pattern_table[2][0x1000];
 byte ppu_nametable[0x1000];
 byte ppu_palette[0x0020];
 
+byte ppu_read(word);
+byte ppu_write(word, byte);
+
 byte clock_ppu();
 
 #endif /* __NES_PPU__ */
