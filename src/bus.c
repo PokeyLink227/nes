@@ -10,7 +10,7 @@ byte (* mapper_write)(word, byte);
 
 byte bus_read(word addr) {
     if      (addr < 0x2000)  return 0x0;
-    else if (addr < 0x4000)  return ppu_registers[addr & 0x01];
+    else if (addr < 0x4000)  return ppu_registers[addr & 0x07];
     else if (addr < 0x4018)  return 0x0;
     else if (addr < 0x4020)  return 0x0;
     else                     return mapper_read(addr);
@@ -21,7 +21,7 @@ byte bus_read(word addr) {
 */
 byte bus_write(word addr, byte data) {
     if      (addr < 0x2000)  return 0x1;
-    else if (addr < 0x4000)  ppu_registers[addr & 0x01] = data;
+    else if (addr < 0x4000)  ppu_registers[addr & 0x07] = data;
     else if (addr < 0x4018)  return 0x1;
     else if (addr < 0x4020)  return 0x1;
     else                     return mapper_write(addr, data);

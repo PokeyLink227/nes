@@ -12,7 +12,6 @@ struct INES_HEADER {
     byte PADDING[5];
 } rom_header;
 
-byte ppu_registers[0x8];
 byte *prg_rom, *prg_ram, *chr_rom;
 
 byte bus_read(word);
