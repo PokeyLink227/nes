@@ -62,7 +62,7 @@ byte cpu_read(word addr) {
     else return bus_read(addr);
 }
 
-byte write(word addr, byte data) {
+byte cpu_write(word addr, byte data) {
     printf("write requested\n");
     if (addr < 0x2000) {
         ram[addr & 0x07FF] = data;
@@ -283,9 +283,9 @@ byte execute_instr(byte instr) {
     }
 
     case OP_BRK: {
-        write(0x0100 + stkptr--, (pc >> 8) & 0x00FF);
-        write(0x0100 + stkptr--, pc & 0x00FF);
-        write(0x0100 + stkptr--, status);
+        cpu_write(0x0100 + stkptr--, (pc >> 8) & 0x00FF);
+        cpu_write(0x0100 + stkptr--, pc & 0x00FF);
+        cpu_write(0x0100 + stkptr--, status);
 
         pc = cpu_read(0xFFFE);
         pc |= (cpu_read(0xFFFF) << 8) & 0xFF00;
@@ -359,7 +359,7 @@ byte execute_instr(byte instr) {
     case OP_DEC: {
         byte temp = cpu_read(data_addr);
         temp -= 1;
-        write(data_addr, temp);
+        cpu_write(data_addr, temp);
         set_flag(ZERO, temp == 0x00);
         set_flag(NEGATIVE, temp & 0x80);
         return 0;
@@ -389,7 +389,7 @@ byte execute_instr(byte instr) {
     case OP_INC: {
         byte temp = cpu_read(data_addr);
         temp += 1;
-        write(data_addr, temp);
+        cpu_write(data_addr, temp);
         set_flag(ZERO, temp == 0x00);
         set_flag(NEGATIVE, temp & 0x80);
         return 0;
@@ -416,8 +416,8 @@ byte execute_instr(byte instr) {
 
     case OP_JSR: {
         pc--;
-        write(0x0100 + stkptr--, (pc >> 8) & 0x00FF);
-        write(0x0100 + stkptr--, pc & 0x00FF);
+        cpu_write(0x0100 + stkptr--, (pc >> 8) & 0x00FF);
+        cpu_write(0x0100 + stkptr--, pc & 0x00FF);
         pc = data_addr;
         return 0;
     }
@@ -472,13 +472,13 @@ byte execute_instr(byte instr) {
     }
 
     case OP_PHA: {
-        write(0x0100 | stkptr, acc);
+        cpu_write(0x0100 | stkptr, acc);
         stkptr--;
         return 0;
     }
 
     case OP_PHP: {
-        write(0x0100 | stkptr, status);
+        cpu_write(0x0100 | stkptr, status);
         stkptr--;
         return 0;
     }
@@ -507,7 +507,7 @@ byte execute_instr(byte instr) {
             temp = cpu_read(data_addr) << 1;
             if (get_flag(CARRY)) temp |= 0x01;
             set_flag(CARRY, cpu_read(data_addr) & 0x80);
-            write(data_addr, temp);
+            cpu_write(data_addr, temp);
         }
         set_flag(ZERO, temp == 0x00);
         set_flag(NEGATIVE, temp & 0x80);
@@ -526,7 +526,7 @@ byte execute_instr(byte instr) {
             temp = cpu_read(data_addr) >> 1;
             if (get_flag(CARRY)) temp |= 0x80;
             set_flag(CARRY, cpu_read(data_addr) & 0x01);
-            write(data_addr, temp);
+            cpu_write(data_addr, temp);
         }
         set_flag(ZERO, temp == 0x00);
         set_flag(NEGATIVE, temp & 0x80);
@@ -580,17 +580,17 @@ byte execute_instr(byte instr) {
     }
 
     case OP_STA: {
-        write(data_addr, acc);
+        cpu_write(data_addr, acc);
         return 0;
     }
 
     case OP_STX: {
-        write(data_addr, x);
+        cpu_write(data_addr, x);
         return 0;
     }
 
     case OP_STY: {
-        write(data_addr, y);
+        cpu_write(data_addr, y);
         return 0;
     }
 
