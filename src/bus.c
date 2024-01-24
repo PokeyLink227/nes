@@ -55,7 +55,7 @@ byte load_rom(const char *file_name) {
     printf("mapper id: %d\n", mapper_id);
 
     switch (mapper_id) {
-        case 0: mapper_read = mapper_read__00; mapper_write = mapper_write_00; break;
+        case 0: mapper_read = mapper_read__00; mapper_write = mapper_write_00; mapper_data = 1; break;
         case 9:
         default: {
             printf("Error: Unsupported mapper\n");
@@ -70,10 +70,18 @@ byte load_rom(const char *file_name) {
 
     fseek(fp, 0, SEEK_END);
     f_size = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
+    fseek(fp, 16, SEEK_SET); /* only works for ines with no trainer */
 
-    read_size = fread(prg_rom, 1, f_size, fp);
-    if (read_size != f_size) return 0;
+    read_size = fread(prg_rom, 1, 16384 * rom_header.PRG_ROM_SIZE, fp);
+    if (read_size != 16384 * rom_header.PRG_ROM_SIZE) {
+        printf("Error: bad read\n");
+        return 1;
+    }
+    read_size = fread(chr_rom, 1, 8192 * rom_header.CHR_ROM_SIZE, fp);
+    if (read_size != 8192 * rom_header.CHR_ROM_SIZE) {
+        printf("Error: bad read\n");
+        return 1;
+    }
 
     fclose(fp);
     return 1;
@@ -82,7 +90,12 @@ byte load_rom(const char *file_name) {
 int main() {
 
     load_rom("nestest.nes");
+    reset_cpu();
 
+
+    while (clock_cpu() == 0) {}
+
+    for (int i = 0; i < 0x100; i++) printf("%02X ", read(i));
 
     return 0;
 }

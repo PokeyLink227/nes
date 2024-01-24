@@ -3,6 +3,8 @@
 
 #include "bus.h"
 
+dword mapper_data;
+
 byte mapper_read__00(word);
 byte mapper_write_00(word, byte);
 

@@ -105,5 +105,6 @@ byte set_address_mode(byte);
 byte execute_instr(byte);
 
 void reset_cpu();
+int clock_cpu();
 
 #endif /* __NES_CPU__ */

@@ -63,8 +63,10 @@ byte read(word addr) {
 }
 
 byte write(word addr, byte data) {
+    printf("write requested\n");
     if (addr < 0x2000) {
         ram[addr & 0x07FF] = data;
+        printf("wrote to %02X\n", addr);
         return 0x00;
     }
     return bus_write(addr, data);
@@ -640,7 +642,7 @@ void reset_cpu() {
     x = 0x00;
     y = 0x00;
     stkptr = 0xFF;
-    //pc = 0x200;
+    pc = 0xC000;
     status = UNUSED;
 }
 
@@ -666,10 +668,12 @@ int clock_cpu() {
 
     cur_instr = opcode_lookup[read(pc++)];
     cycles = cur_instr.cycles;
-    printf("%s", mnemonics[cur_instr.opcode]);
+    printf("%s\n", mnemonics[cur_instr.opcode]);
     extra_cycle = set_address_mode(cur_instr.addr_mode);
     extra_cycle &= execute_instr(cur_instr.opcode);
     if (extra_cycle) cycles++;
+
+    if (cur_instr.opcode == OP_BRK) return 1;
 
     return 0;
 }
