@@ -1,8 +1,8 @@
-CC = gcc
+CC = C:\raylib\mingw\bin\gcc
 CFLAGS = -Wall -Wextra -pedantic-errors
 
 nes: obj\bus.o obj\cpu.o obj\ppu.o obj\mappers.o
-	$(CC) $(CFLAGS) obj\bus.o obj\cpu.o obj\ppu.o obj\mappers.o -o nes
+	$(CC) $(CFLAGS) obj\bus.o obj\cpu.o obj\ppu.o obj\mappers.o -o nes -lraylib -lopengl32 -lgdi32 -lwinmm
 
 obj\bus.o: src\bus.c src\bus.h src\cpu.h src\ppu.h
 	$(CC) $(CFLAGS) src\bus.c -c -o obj\bus.o

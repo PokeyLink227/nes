@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "bus.h"
 #include "cpu.h"
 #include "ppu.h"
 #include "mappers.h"
+#include "raylib.h"
 
 byte (* mapper_read)(word);
 byte (* mapper_write)(word, byte);
@@ -88,6 +90,19 @@ byte load_rom(const char *file_name) {
 }
 
 int main() {
+    int screen_width = 256, screen_height = 240, scale = 2;
+    InitWindow(screen_width * scale, screen_height * scale, "Pokey Nes Emu");
+    SetTargetFPS(60);
+
+    while (!WindowShouldClose()) {
+
+        BeginDrawing();
+            ClearBackground(BLACK);
+            DrawText("TEST", 0, 0, 15, WHITE);
+        EndDrawing();
+    }
+
+    return 0;
 
     load_rom("nestest.nes");
     reset_cpu();
@@ -95,7 +110,7 @@ int main() {
 
     while (clock_cpu() == 0) {}
 
-    for (int i = 0; i < 0x100; i++) printf("%02X ", read(i));
+    for (int i = 0; i < 0x100; i++) printf("%02X ", cpu_read(i));
 
     return 0;
 }
