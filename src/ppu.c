@@ -16,3 +16,7 @@ byte ppu_write(word addr, byte data) {
     else                    ppu_palette[addr & 0x001F] = data;
     return 0x0;
 }
+
+byte clock_ppu() {
+    
+}

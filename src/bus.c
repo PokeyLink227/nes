@@ -85,6 +85,8 @@ byte load_rom(const char *file_name) {
         return 1;
     }
 
+    printf("Loaded Rom\n");
+
     fclose(fp);
     return 1;
 }
@@ -93,18 +95,33 @@ int main() {
     int screen_width = 256, screen_height = 240, scale = 2;
     InitWindow(screen_width * scale, screen_height * scale, "Pokey Nes Emu");
     SetTargetFPS(60);
+    load_rom("nestest.nes");
+
+    Color colors[3] = {BLACK, WHITE, RED};
 
     while (!WindowShouldClose()) {
-
         BeginDrawing();
             ClearBackground(BLACK);
-            DrawText("TEST", 0, 0, 15, WHITE);
+
+            for (int y = 0; y < 16; y++) {
+                for (int x = 0; x < 16; x++) {
+                    // draw each tile
+                    for (int j = 0; j < 8; j++) {
+                        for (int i = 0; i < 8; i++) {
+                            int val =
+                                (((chr_rom[(x + y * 16) * 16 + j] << i) & 0x80) >> 7) +
+                                (((chr_rom[(x + y * 16) * 16 + 8 + j] << i) & 0x80) >> 7);
+                            DrawPixel(x * 8 + i, y * 8 + j, colors[val]);
+                        }
+                    }
+                }
+            }
+
         EndDrawing();
     }
 
     return 0;
 
-    load_rom("nestest.nes");
     reset_cpu();
 
 
