@@ -1,5 +1,5 @@
-#ifndef __NES_CPU__
-#define __NES_CPU__
+#ifndef __POKEY_NES_CPU__
+#define __POKEY_NES_CPU__
 
 #include "bus.h"
 
@@ -101,4 +101,4 @@ byte cpu_write(word, byte);
 void reset_cpu();
 byte clock_cpu();
 
-#endif /* __NES_CPU__ */
+#endif /* __POKEY_NES_CPU__ */

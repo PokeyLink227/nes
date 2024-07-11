@@ -1,5 +1,5 @@
-#ifndef __NES_BUS__
-#define __NES_BUS__
+#ifndef __POKEY_NES_BUS__
+#define __POKEY_NES_BUS__
 
 typedef unsigned char   byte;
 typedef unsigned short  word;
@@ -17,4 +17,4 @@ byte *prg_rom, *prg_ram, *chr_rom;
 byte bus_read(word);
 byte bus_write(word, byte);
 
-#endif /* __NES_BUS__ */
+#endif /* __POKEY_NES_BUS__ */

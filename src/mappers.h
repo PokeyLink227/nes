@@ -1,5 +1,5 @@
-#ifndef __NES_MAPPERS__
-#define __NES_MAPPERS__
+#ifndef __POKEY_NES_MAPPERS__
+#define __POKEY_NES_MAPPERS__
 
 #include "bus.h"
 
@@ -14,4 +14,4 @@ byte mapper_write_01(word, byte);
 byte mapper_read__02(word);
 byte mapper_write_02(word, byte);
 
-#endif /* __NES_MAPPERS__ */
+#endif /* __POKEY_NES_MAPPERS__ */

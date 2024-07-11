@@ -1,5 +1,5 @@
-#ifndef __NES_PPU__
-#define __NES_PPU__
+#ifndef __POKEY_NES_PPU__
+#define __POKEY_NES_PPU__
 
 #include "bus.h"
 
@@ -38,4 +38,4 @@ byte ppu_write(word, byte);
 
 byte clock_ppu();
 
-#endif /* __NES_PPU__ */
+#endif /* __POKEY_NES_PPU__ */
