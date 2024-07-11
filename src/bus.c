@@ -61,8 +61,8 @@ byte load_rom(const char *file_name) {
         case 9:
         default: {
             printf("Error: Unsupported mapper\n");
-            fclose(fp);
-            return 1;
+            //fclose(fp);
+            //return 1;
         }
     }
 
@@ -92,18 +92,30 @@ byte load_rom(const char *file_name) {
 }
 
 int main() {
-    int screen_width = 256, screen_height = 240, scale = 2;
+    int screen_width = 256, screen_height = 240, scale = 1;
     InitWindow(screen_width * scale, screen_height * scale, "Pokey Nes Emu");
     SetTargetFPS(60);
-    load_rom("nestest.nes");
 
+    unsigned int clock_time = 0;
+    unsigned int frame_number = 0;
     Color colors[3] = {BLACK, WHITE, RED};
 
+    load_rom("nestest.nes");
+    reset_cpu();
+
     while (!WindowShouldClose()) {
+
+        //if (clock_time % 3 == 0) clock_cpu();
+        clock_ppu();
+        clock_time++;
+
+
+
         BeginDrawing();
             ClearBackground(BLACK);
 
-            for (int y = 0; y < 16; y++) {
+/*
+            for (int y = 0; y < 32; y++) {
                 for (int x = 0; x < 16; x++) {
                     // draw each tile
                     for (int j = 0; j < 8; j++) {
@@ -111,13 +123,16 @@ int main() {
                             int val =
                                 (((chr_rom[(x + y * 16) * 16 + j] << i) & 0x80) >> 7) +
                                 (((chr_rom[(x + y * 16) * 16 + 8 + j] << i) & 0x80) >> 7);
-                            DrawPixel(x * 8 + i, y * 8 + j, colors[val]);
+                            //DrawPixel(x * 8 + i, y * 8 + j, colors[val]);
+                            DrawRectangle((x * 8 + i) * scale, (y * 8 + j) * scale, scale, scale, colors[val]);
                         }
                     }
                 }
             }
-
+*/
         EndDrawing();
+
+        //frame_number++;
     }
 
     return 0;

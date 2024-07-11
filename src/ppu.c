@@ -1,5 +1,14 @@
 #include "ppu.h"
 
+enum ppu_state {
+    PPU_IDLE,
+    PPU_NAME,
+    PPU_ATTRIBUTE,
+    PPU_PATTERN_LOW,
+    PPU_PATTERN_HIGH,
+    PPU_RENDER,
+};
+
 byte ppu_read(word addr) {
     if      (addr < 0x1000) return ppu_pattern_table[0][addr];
     else if (addr < 0x2000) return ppu_pattern_table[1][addr - 0x1000];
@@ -18,5 +27,32 @@ byte ppu_write(word addr, byte data) {
 }
 
 byte clock_ppu() {
-    
+    static int scanline = 0;
+    static int cycle = 0;
+    //static int state = PPU_IDLE;
+
+    static byte nametable, attribute, pattern_low, pattern_high;
+
+    switch ((cycle - 1) % 8) {
+        case -1: break;
+        case 0: break; /* name table */
+        case 1: {
+            
+        }
+        case 2: break; /* attribute table */
+        case 3: {
+
+        }
+        case 4: break; /* pattern table low */
+        case 5: {
+
+        }
+        case 6: break; /* pattern table high */
+        case 7: {
+
+        }
+        default:
+            break;
+    }
+
 }
